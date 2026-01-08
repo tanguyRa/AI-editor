@@ -1,0 +1,48 @@
+__pycache__/
+dist/
+tmp/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.orig.*
+*.log
+*.cache
+build
+.idea
+.next
+.turbo
+.DS_Store
+.vscode
+.claude
+CLAUDE.md
+
+# Ignore environment and locally built files
+.env
+.env.dev
+.env.prod
+.secrets/
+!.secrets/README.md
+
+data/
+
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea

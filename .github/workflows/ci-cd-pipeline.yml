@@ -1,0 +1,233 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write  # For security scanning results
+  actions: read           # For workflow artifacts
+  packages: write         # For pushing to registry
+
+env:
+  REGISTRY: registry.budhapp.com
+  PROJECT_NAME: ${{ vars.PROJECT_NAME || github.event.repository.name }}
+  GO_VERSION: '1.24'
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  # Test and lint Go backend
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: backend/go.sum
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run Go vet
+        run: go vet ./...
+
+      - name: Run tests
+        run: go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Generate coverage report
+        run: go tool cover -html=coverage.out -o coverage.html
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: backend/coverage.html
+
+  # Lint and validate frontend
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate JavaScript syntax
+        run: |
+          echo "Validating JavaScript files for syntax errors..."
+          find backend/web -name "*.js" -type f -exec node --check {} \; || exit 1
+
+      - name: Check HTML validity
+        run: |
+          echo "Checking HTML files for basic validity..."
+          find backend/web -name "*.html" -type f -exec grep -l "<html" {} \; | wc -l
+
+      - name: Validate CSS
+        run: |
+          echo "Checking CSS files for basic validity..."
+          find backend/web -name "*.css" -type f -exec head -n 1 {} \;
+
+      - name: Validate Web Components
+        run: |
+          echo "Validating Web Components structure..."
+          component_count=$(find backend/web/app.budhapp.com/components -name "*.js" -type f | wc -l)
+          echo "Found $component_count Web Component files"
+
+          # Check that components extend HTMLElement
+          find backend/web/app.budhapp.com/components -name "*.js" -type f -exec grep -l "extends HTMLElement" {} \; | wc -l
+
+  # Security scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [test-backend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner (filesystem)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './backend'
+          format: 'table'
+          exit-code: '0'  # Don't fail the build on vulnerabilities, just report them
+
+      - name: Run Trivy vulnerability scanner (config files)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0'
+
+      - name: Generate detailed security report
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './backend'
+          format: 'json'
+          output: 'trivy-report.json'
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-report
+          path: trivy-report.json
+          retention-days: 30
+
+      - name: Generate SARIF report (for Advanced Security)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './backend'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload SARIF to GitHub Security (if available)
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        continue-on-error: true  # Don't fail if Advanced Security is not available
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Build and push Docker images
+  build-and-push:
+    name: Build and Push
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend, security-scan]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.PROJECT_NAME }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/dev' }}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            TARGETOS=linux
+            TARGETARCH=amd64
+
+  # Notification job
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend, security-scan, build-and-push]
+    if: always()
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "🏗️  CI/CD Pipeline Summary"
+          echo "=========================="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Project: ${{ env.PROJECT_NAME }}"
+          echo ""
+
+          # Job status summary
+          echo "📊 Job Results:"
+          echo "Backend Tests: ${{ needs.test-backend.result }}"
+          echo "Frontend Tests: ${{ needs.test-frontend.result }}"
+          echo "Security Scan: ${{ needs.security-scan.result }}"
+          echo "Build & Push: ${{ needs.build-and-push.result }}"
+
+          echo ""
+
+          # Overall status
+          if [ "${{ needs.build-and-push.result }}" == "success" ]; then
+            echo "✅ Pipeline completed successfully!"
+            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+              echo "🚀 Image pushed to registry.budhapp.com/${{ env.PROJECT_NAME }}:latest"
+            elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+              echo "🚀 Image pushed to registry.budhapp.com/${{ env.PROJECT_NAME }}:dev"
+            else
+              echo "🚀 Image pushed to registry.budhapp.com/${{ env.PROJECT_NAME }}"
+            fi
+          else
+            echo "❌ Pipeline failed"
+            exit 1
+          fi

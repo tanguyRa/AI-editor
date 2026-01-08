@@ -1,0 +1,43 @@
+services:
+  app:
+    image: ${DOCKER_REGISTRY:-registry.budhapp.com}/${PROJECT_NAME}-app:${TAG:-latest}
+    container_name: ${PROJECT_NAME}-app
+    build:
+      context: ./app
+      target: ${DOCKER_TARGET:-production}
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./app:/app
+      - /app/node_modules
+      - /app/.nuxt
+    depends_on:
+      - api
+    environment:
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+
+  api:
+    image: ${DOCKER_REGISTRY:-registry.budhapp.com}/${PROJECT_NAME}-api:${TAG:-latest}
+    container_name: ${PROJECT_NAME}-api
+    build:
+      context: ./api
+      target: ${DOCKER_TARGET:-production}
+      dockerfile: Dockerfile
+      args:
+        TARGETOS: ${TARGETOS:-linux}
+        TARGETARCH: ${TARGETARCH:-amd64}
+    platform: ${PLATFORM:-linux}/${TARGETARCH:-amd64}
+    environment:
+      - PROJECT_NAME=${PROJECT_NAME}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL}
+      - DATABASE_URL=${DATABASE_URL}
+    volumes:
+      - ./api:/app
+      - ./data/shared:/data/shared
+    ports:
+      - 8080:8080
+
+

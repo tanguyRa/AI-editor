@@ -1,0 +1,87 @@
+package config
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"os"
+)
+
+type Config struct {
+	Environment string           `json:"environment"`
+	Encryption  EncryptionConfig `json:"encryption"`
+}
+
+type EncryptionConfig struct {
+	Key string `json:"key"`
+}
+
+// Load reads configuration from environment variables and optionally from a config file
+func Load() (*Config, error) {
+	// Start with defaults
+	config := setDefaults()
+
+	// Override with file config if present
+	if configPath := os.Getenv("CONFIG_FILE"); configPath != "" {
+		if err := loadFromFile(configPath, config); err != nil {
+			return nil, fmt.Errorf("error loading config file: %w", err)
+		}
+	}
+
+	// Override with environment variables
+	loadFromEnv(config)
+
+	// Validate final configuration
+	if err := validate(config); err != nil {
+		return nil, fmt.Errorf("invalid configuration: %w", err)
+	}
+
+	return config, nil
+}
+
+func loadFromFile(path string, config *Config) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return json.NewDecoder(file).Decode(config)
+}
+
+func loadFromEnv(config *Config) {
+	if environment := os.Getenv("ENVIRONMENT"); environment != "" {
+		config.Environment = environment
+	}
+
+	// Encryption configuration
+	if encryptionKey := os.Getenv("ENCRYPTION_KEY"); encryptionKey != "" {
+		config.Encryption.Key = encryptionKey
+	}
+}
+
+func setDefaults() *Config {
+	return &Config{
+		Environment: "dev",
+	}
+}
+
+func validate(config *Config) error {
+	if config.Environment == "" {
+		return fmt.Errorf("environment is required")
+	}
+
+	// Encryption key validation
+	if config.Encryption.Key != "" {
+		// Decode base64 key and check decoded length
+		decodedKey, err := base64.StdEncoding.DecodeString(config.Encryption.Key)
+		if err != nil {
+			return fmt.Errorf("encryption key must be valid base64: %w", err)
+		}
+		if len(decodedKey) != 32 {
+			return fmt.Errorf("encryption key must decode to exactly 32 bytes (256 bits), got %d bytes", len(decodedKey))
+		}
+	}
+
+	return nil
+}
