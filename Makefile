@@ -15,6 +15,8 @@ stop:
 
 front:
 	docker exec -it ${PROJECT_NAME}-app /bin/bash
+back:
+	docker exec -it ${PROJECT_NAME}-api /bin/bash
 
 generate: sqlc
 sqlc:
