@@ -40,13 +40,21 @@ CREATE TABLE "account" (
 );
 
 -- Verifications table
-CREATE TABLE verification (
+CREATE TABLE "verification" (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
     identifier VARCHAR(255) NOT NULL,
     value VARCHAR(255) NOT NULL,
     "expiresAt" TIMESTAMPTZ NOT NULL,
     "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE "jwks" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+    "publicKey" TEXT NOT NULL,
+    "privateKey" TEXT NOT NULL,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expiresAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes

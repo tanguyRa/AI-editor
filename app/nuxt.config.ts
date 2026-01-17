@@ -9,6 +9,11 @@ export default defineNuxtConfig({
     enabled: true
   },
 
+  runtimeConfig: {
+    // Server-side only (not exposed to client)
+    goApiUrl: process.env.GO_API_URL || 'http://api:8080'
+  },
+
   css: ['~/assets/css/main.css'],
 
   routeRules: {
@@ -24,5 +29,15 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
+  },
+
+  vite: {
+    server: {
+      allowedHosts: ['app', 'app-budhapp']
+    }
+  },
+
+  nitro: {
+    compressPublicAssets: false
   }
 })

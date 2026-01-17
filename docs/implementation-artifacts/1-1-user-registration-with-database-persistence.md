@@ -1,6 +1,6 @@
 # Story 1.1: User Registration with Database Persistence
 
-Status: review
+Status: done
 
 ## Story
 
@@ -248,24 +248,36 @@ None - implementation completed without blocking issues.
 
 - **Task 4 Complete:** Implemented PostgreSQL-backed SignUp handler with:
   - Request validation (email, password, name required)
+  - Email format validation (regex-based)
   - Duplicate email check via GetUserByEmail
   - Password hashing with bcrypt (DefaultCost = 10)
-  - User, account, and session creation with proper UUIDs
+  - User, account, and session creation in database transaction (atomic)
   - IP address capture from X-Forwarded-For or RemoteAddr
   - User-Agent header capture
-  - better-auth.session_token cookie set (HttpOnly, SameSite=Lax)
+  - better-auth.session_token cookie set (HttpOnly, SameSite=Lax, Secure in production)
   - Response in better-auth compatible format (camelCase JSON)
 
 - **Task 5 Complete:** Wrote comprehensive tests covering:
   - Successful registration (verifies user + session response, cookie set)
   - Duplicate email returns USER_ALREADY_EXISTS
   - Missing/empty fields return INVALID_BODY (table-driven tests)
+  - Invalid email format returns INVALID_BODY (table-driven tests)
   - Invalid JSON returns INVALID_BODY
   - Password is hashed and verifiable with bcrypt
   - Wrong HTTP method returns METHOD_NOT_ALLOWED
 
+- **Code Review Fixes Applied:**
+  - H1: Added database transaction for atomic user/account/session creation
+  - H3: Added email format validation with regex
+  - M1: CORS middleware now validates origins against whitelist (configurable via CORS_ALLOWED_ORIGINS env var)
+  - M2: crypto/rand.Read error now checked in token generation
+  - M5: Renamed response helpers to respondJSON/respondError per project-context.md
+  - L2: Secure cookie flag now environment-aware (enabled in production)
+  - Added SessionExpiry and SessionMaxAge constants (removed magic numbers)
+
 ### Change Log
 
+- 2026-01-15: Code review fixes applied (transaction support, email validation, CORS security, response helper naming)
 - 2026-01-15: Implemented user registration with database persistence (Story 1.1)
 
 ### File List

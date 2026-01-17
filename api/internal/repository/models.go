@@ -26,6 +26,14 @@ type Account struct {
 	UpdatedAt             time.Time  `json:"updatedAt"`
 }
 
+type Jwk struct {
+	ID         uuid.UUID  `json:"id"`
+	PublicKey  string     `json:"publicKey"`
+	PrivateKey string     `json:"privateKey"`
+	CreatedAt  time.Time  `json:"createdAt"`
+	ExpiresAt  *time.Time `json:"expiresAt"`
+}
+
 type Session struct {
 	ID        uuid.UUID `json:"id"`
 	UserId    uuid.UUID `json:"userId"`

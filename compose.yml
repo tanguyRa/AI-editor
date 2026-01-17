@@ -15,8 +15,8 @@ services:
     depends_on:
       - api
     environment:
-      - PORT=3000
       - DATABASE_URL=${DATABASE_URL}
+      - GO_API_URL=${GO_API_URL:-http://${PROJECT_NAME}-api:8080}
 
   api:
     image: ${DOCKER_REGISTRY:-registry.budhapp.com}/${PROJECT_NAME}-api:${TAG:-latest}

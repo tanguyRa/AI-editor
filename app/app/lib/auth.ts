@@ -1,5 +1,7 @@
-import { ClientBase, Pool } from "pg";
+import { Pool } from "pg";
 import { betterAuth } from "better-auth";
+import { jwt } from "better-auth/plugins"
+
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -12,7 +14,6 @@ const pool = new Pool({
 
 
 export const auth = betterAuth({
-    baseUrl: "http://localhost:8080",
     database: pool,
     advanced: {
         database: {
@@ -25,4 +26,7 @@ export const auth = betterAuth({
             console.log("Reset password url:", url);
         },
     },
+    plugins: [
+        jwt()
+    ]
 })
