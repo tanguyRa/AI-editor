@@ -9,11 +9,17 @@ import (
 
 type Config struct {
 	Environment string           `json:"environment"`
+	Address     string           `json:"address"`
 	Encryption  EncryptionConfig `json:"encryption"`
+	Database    DatabaseConfig   `json:"database"`
 }
 
 type EncryptionConfig struct {
 	Key string `json:"key"`
+}
+
+type DatabaseConfig struct {
+	ConnectionString string `json:"connectionString"`
 }
 
 // Load reads configuration from environment variables and optionally from a config file
@@ -54,21 +60,37 @@ func loadFromEnv(config *Config) {
 		config.Environment = environment
 	}
 
+	if address := os.Getenv("ADDRESS"); address != "" {
+		config.Address = address
+	}
+
 	// Encryption configuration
 	if encryptionKey := os.Getenv("ENCRYPTION_KEY"); encryptionKey != "" {
 		config.Encryption.Key = encryptionKey
+	}
+
+	// Database configuration
+	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
+		config.Database = DatabaseConfig{
+			ConnectionString: databaseURL,
+		}
 	}
 }
 
 func setDefaults() *Config {
 	return &Config{
 		Environment: "dev",
+		Address:     ":8080",
 	}
 }
 
 func validate(config *Config) error {
 	if config.Environment == "" {
 		return fmt.Errorf("environment is required")
+	}
+
+	if config.Address == "" {
+		return fmt.Errorf("address is required")
 	}
 
 	// Encryption key validation
@@ -81,6 +103,11 @@ func validate(config *Config) error {
 		if len(decodedKey) != 32 {
 			return fmt.Errorf("encryption key must decode to exactly 32 bytes (256 bits), got %d bytes", len(decodedKey))
 		}
+	}
+
+	// Database configuration validation
+	if config.Database.ConnectionString == "" {
+		return fmt.Errorf("database connection string is required")
 	}
 
 	return nil

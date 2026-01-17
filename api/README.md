@@ -29,37 +29,38 @@ For detailed schema documentation and examples, see the schema files in `cmd/cod
 app/
 ├── README.md
 ├── main.go
-├── internal/
-│   ├── config/
-│   │   ├── README.md
-│   │   └── config.go
-│   ├── handlers/
-│   │   ├── README.md
-│   │   └── utils.go
-│   ├── repository/
-│   │   ├── README.md
-│   │   ├── db.go
-│   │   ├── models.go
-│   │   ├── sessions.sql.go
-│   │   └── users.sql.go
-│   ├── server/
-│   │   ├── README.md
-│   │   └── main.go
-│   └── utils/
-│       ├── README.md
-│       └── date_parser.go
-└── pkg/
-    ├── auth/
+└── internal/
+    ├── config/
     │   ├── README.md
-    │   └── auth.go
-    ├── database/
+    │   └── config.go
+    ├── handlers/
     │   ├── README.md
-    │   ├── adapter.go
-    │   └── main.go
-    ├── oauth/
+    │   ├── auth.go
+    │   ├── handlers.go
+    │   └── response.go
+    ├── middleware/
     │   ├── README.md
-    │   └── provider.go
-    └── session/
+    │   ├── chain.go
+    │   ├── chain_test.go
+    │   └── cors.go
+    ├── repository/
+    │   ├── README.md
+    │   ├── accounts.sql.go
+    │   ├── db.go
+    │   ├── jwks.sql.go
+    │   ├── models.go
+    │   ├── sessions.sql.go
+    │   └── users.sql.go
+    ├── server/
+    │   ├── README.md
+    │   ├── middleware.go
+    │   ├── routes.go
+    │   ├── server.go
+    │   └── utils.go
+    ├── session/
+    │   ├── README.md
+    │   └── context.go
+    └── utils/
         ├── README.md
-        └── session.go
+        └── date_parser.go
 ```

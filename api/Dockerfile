@@ -16,8 +16,6 @@ WORKDIR /app
 # -------------------------
 # --- Development Stage ---
 # -------------------------
-
-# Use the official Alpine image for a lean production container.
 FROM staging AS development
 
 # Install sqlc

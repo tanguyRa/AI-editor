@@ -53,3 +53,6 @@ DELETE FROM "session" WHERE id = $1 RETURNING *;
 
 -- name: DeleteUserSessions :exec
 DELETE FROM "session" WHERE "userId" = $1;
+
+-- name: GetSessionByToken :one
+SELECT * FROM "session" WHERE token = $1;
