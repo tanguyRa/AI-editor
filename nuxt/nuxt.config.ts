@@ -2,11 +2,17 @@
 export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
-    '@nuxt/ui'
+    '@nuxt/ui',
+    "@polar-sh/nuxt"
   ],
 
   devtools: {
     enabled: true
+  },
+
+  colorMode: {
+    preference: 'system',
+    fallback: 'dark'
   },
 
   runtimeConfig: {
@@ -20,7 +26,7 @@ export default defineNuxtConfig({
     '/': { prerender: true }
   },
 
-  compatibilityDate: '2025-01-15',
+  compatibilityDate: '2026-01-19',
 
   eslint: {
     config: {
