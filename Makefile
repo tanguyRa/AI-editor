@@ -12,9 +12,12 @@ start: build
 	${COMPOSE} up
 stop:
 	${COMPOSE} down
+restart: stop start
 
-front:
-	docker exec -it ${PROJECT_NAME}-app /bin/bash
+nuxt:
+	docker exec -it ${PROJECT_NAME}-nuxt /bin/bash
+svelt:
+	docker exec -it ${PROJECT_NAME}-svelt /bin/bash
 back:
 	docker exec -it ${PROJECT_NAME}-api /bin/bash
 
