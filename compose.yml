@@ -1,15 +1,15 @@
 services:
-  app:
-    image: ${DOCKER_REGISTRY:-registry.budhapp.com}/${PROJECT_NAME}-app:${TAG:-latest}
-    container_name: ${PROJECT_NAME}-app
+  nuxt:
+    image: ${DOCKER_REGISTRY:-registry.budhapp.com}/${PROJECT_NAME}-nuxt:${TAG:-latest}
+    container_name: ${PROJECT_NAME}-n
     build:
-      context: ./app
+      context: ./nuxt
       target: ${DOCKER_TARGET:-production}
       dockerfile: Dockerfile
     ports:
       - 3000:3000
     volumes:
-      - ./app:/app
+      - ./nuxt:/app
       - /app/node_modules
       - /app/.nuxt
     depends_on:
@@ -17,6 +17,10 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - GO_API_URL=${GO_API_URL:-http://${PROJECT_NAME}-api:8080}
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER}
+      - POLAR_ACCESS_TOKEN=${POLAR_ACCESS_TOKEN}
+      - POLAR_SERVER=${POLAR_SERVER}
+      - POLAR_SUCCESS_URL=${POLAR_SUCCESS_URL}
 
   api:
     image: ${DOCKER_REGISTRY:-registry.budhapp.com}/${PROJECT_NAME}-api:${TAG:-latest}
@@ -32,8 +36,9 @@ services:
     environment:
       - PROJECT_NAME=${PROJECT_NAME}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
-      - BETTER_AUTH_URL=${BETTER_AUTH_URL}
       - DATABASE_URL=${DATABASE_URL}
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER}
+      - POLAR_ACCESS_TOKEN=${POLAR_ACCESS_TOKEN}
     volumes:
       - ./api:/app
       - ./data/shared:/data/shared
