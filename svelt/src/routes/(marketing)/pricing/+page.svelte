@@ -104,8 +104,6 @@
 
         checkoutLoading = slug;
         try {
-            // Use the polar checkout function from auth-client
-            // This redirects to Polar's checkout page
             await checkout({ slug });
         } catch (e) {
             console.error("Checkout error:", e);
@@ -116,7 +114,7 @@
 
 <div class="pricing-container">
     <div class="pricing-content">
-        <div class="pricing-header">
+        <div class="section-header">
             <h1>Choose Your Plan</h1>
             <p>Select the plan that best fits your needs</p>
         </div>
@@ -127,7 +125,7 @@
                 <p>Loading plans...</p>
             </div>
         {:else if error}
-            <div class="error-message">{error}</div>
+            <div class="error-message centered">{error}</div>
         {:else if products.length === 0}
             <div class="empty-state">
                 <p>No plans available at the moment.</p>
@@ -136,7 +134,6 @@
             <div class="plans-grid">
                 {#each products as product}
                     {@const isHighlighted = product.isHighlighted || product.slug === "Premium"}
-                    {@const isFree = product.prices[0]?.priceAmount === 0 || product.prices[0]?.priceAmount === null}
                     <div class="plan-card" class:highlighted={isHighlighted}>
                         {#if isHighlighted}
                             <div class="badge">Most Popular</div>
@@ -175,13 +172,13 @@
                         </ul>
 
                         <button
-                            class="plan-button"
-                            class:primary={isHighlighted}
+                            class="btn plan-button"
+                            class:btn-primary={isHighlighted}
                             onclick={() => handleCheckout(product.slug)}
                             disabled={checkoutLoading !== null}
                         >
                             {#if checkoutLoading === product.slug}
-                                <span class="button-spinner"></span>
+                                <span class="spinner spinner-sm"></span>
                                 Processing...
                             {:else}
                                 {getButtonLabel(product)}
@@ -204,11 +201,11 @@
 </div>
 
 <style>
+    /* Pricing Page Specific Styles */
     .pricing-container {
         min-height: 100vh;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem 1rem;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        background: var(--gradient-primary);
+        padding: var(--spacing-xl) var(--spacing-md);
     }
 
     .pricing-content {
@@ -216,22 +213,17 @@
         margin: 0 auto;
     }
 
-    .pricing-header {
-        text-align: center;
-        margin-bottom: 3rem;
+    .pricing-content .section-header {
         color: white;
     }
 
-    .pricing-header h1 {
-        margin: 0 0 0.75rem;
-        font-size: 2.5rem;
-        font-weight: 700;
+    .pricing-content .section-header h1 {
+        font-size: var(--font-size-4xl);
+        margin-bottom: 0.75rem;
     }
 
-    .pricing-header p {
-        margin: 0;
-        font-size: 1.125rem;
-        opacity: 0.9;
+    .pricing-content .section-header p {
+        color: rgba(255, 255, 255, 0.9);
     }
 
     .loading {
@@ -239,31 +231,15 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 4rem;
+        padding: var(--spacing-3xl);
         color: white;
     }
 
-    .spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
+    .loading p {
+        margin-top: var(--spacing-md);
     }
 
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    .error-message {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        color: #dc2626;
-        padding: 1rem 1.5rem;
-        border-radius: 12px;
-        text-align: center;
+    .centered {
         max-width: 400px;
         margin: 0 auto;
     }
@@ -271,35 +247,35 @@
     .empty-state {
         text-align: center;
         color: white;
-        padding: 4rem;
+        padding: var(--spacing-3xl);
         opacity: 0.9;
     }
 
     .plans-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
+        gap: var(--spacing-lg);
         align-items: stretch;
     }
 
     .plan-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
+        background: var(--color-bg);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
         display: flex;
         flex-direction: column;
         position: relative;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: transform var(--transition-base), box-shadow var(--transition-base);
+        box-shadow: var(--shadow-md);
     }
 
     .plan-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        box-shadow: var(--shadow-lg);
     }
 
     .plan-card.highlighted {
-        border: 2px solid #667eea;
+        border: 2px solid var(--color-primary);
         transform: scale(1.02);
     }
 
@@ -312,63 +288,61 @@
         top: -12px;
         left: 50%;
         transform: translateX(-50%);
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--gradient-primary);
         color: white;
         padding: 0.375rem 1rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: var(--font-size-xs);
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
     .plan-header {
-        margin-bottom: 1.5rem;
+        margin-bottom: var(--spacing-lg);
     }
 
     .plan-header h2 {
-        margin: 0 0 0.5rem;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1a1a2e;
+        font-size: var(--font-size-2xl);
+        margin-bottom: var(--spacing-sm);
+        color: var(--color-text);
     }
 
     .description {
-        margin: 0;
-        color: #6b7280;
+        color: var(--color-text-muted);
         font-size: 0.95rem;
         line-height: 1.5;
     }
 
     .plan-price {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1.5rem;
-        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 1px solid var(--color-border);
     }
 
     .amount {
         font-size: 3rem;
         font-weight: 700;
-        color: #1a1a2e;
+        color: var(--color-text);
         line-height: 1;
     }
 
     .cycle {
-        font-size: 1.125rem;
-        color: #6b7280;
-        margin-left: 0.25rem;
+        font-size: var(--font-size-lg);
+        color: var(--color-text-muted);
+        margin-left: var(--spacing-xs);
     }
 
     .period {
-        margin: 0.5rem 0 0;
-        font-size: 0.875rem;
-        color: #9ca3af;
+        margin-top: var(--spacing-sm);
+        font-size: var(--font-size-sm);
+        color: var(--color-text-light);
     }
 
     .features {
         list-style: none;
         padding: 0;
-        margin: 0 0 2rem;
+        margin: 0 0 var(--spacing-xl);
         flex: 1;
     }
 
@@ -377,67 +351,36 @@
         align-items: flex-start;
         gap: 0.75rem;
         padding: 0.625rem 0;
-        color: #374151;
+        color: var(--color-text-secondary);
         font-size: 0.95rem;
         line-height: 1.4;
     }
 
     .features li svg {
         flex-shrink: 0;
-        color: #10b981;
+        color: var(--color-success);
         margin-top: 2px;
     }
 
     .plan-button {
         width: 100%;
-        padding: 1rem 1.5rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 10px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        background: white;
-        color: #374151;
+        border: 2px solid var(--color-border);
+        background: var(--color-bg);
+        color: var(--color-text-secondary);
     }
 
     .plan-button:hover:not(:disabled) {
-        border-color: #667eea;
-        color: #667eea;
+        border-color: var(--color-primary);
+        color: var(--color-primary);
     }
 
-    .plan-button.primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .plan-button.btn-primary {
         border: none;
-        color: white;
-    }
-
-    .plan-button.primary:hover:not(:disabled) {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-
-    .plan-button:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-    }
-
-    .button-spinner {
-        width: 18px;
-        height: 18px;
-        border: 2px solid transparent;
-        border-top-color: currentColor;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
     }
 
     .pricing-footer {
         text-align: center;
-        margin-top: 3rem;
+        margin-top: var(--spacing-2xl);
         color: white;
     }
 
@@ -458,10 +401,6 @@
     }
 
     @media (max-width: 768px) {
-        .pricing-header h1 {
-            font-size: 2rem;
-        }
-
         .plans-grid {
             grid-template-columns: 1fr;
         }
