@@ -57,7 +57,7 @@ func (s *Server) Start() error {
 	s.queries = repository.New(pool)
 
 	// Create handlers (pass pool for transaction support)
-	s.handlers = handlers.New(s.queries, s.logger)
+	s.handlers = handlers.New(s.queries, s.logger, s.config)
 
 	// Setup routes
 	handler := s.initRoutes()

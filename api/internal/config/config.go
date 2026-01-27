@@ -12,6 +12,11 @@ type Config struct {
 	Address     string           `json:"address"`
 	Encryption  EncryptionConfig `json:"encryption"`
 	Database    DatabaseConfig   `json:"database"`
+	Polar       PolarConfig      `json:"polar"`
+}
+
+type PolarConfig struct {
+	WebhookSecret string `json:"webhookSecret"`
 }
 
 type EncryptionConfig struct {
@@ -74,6 +79,11 @@ func loadFromEnv(config *Config) {
 		config.Database = DatabaseConfig{
 			ConnectionString: databaseURL,
 		}
+	}
+
+	// Polar configuration
+	if polarWebhookSecret := os.Getenv("POLAR_WEBHOOK_SECRET"); polarWebhookSecret != "" {
+		config.Polar.WebhookSecret = polarWebhookSecret
 	}
 }
 

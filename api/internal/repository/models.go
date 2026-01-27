@@ -26,12 +26,31 @@ type Account struct {
 	UpdatedAt             time.Time  `json:"updatedAt"`
 }
 
+type Event struct {
+	ID        uuid.UUID `json:"id"`
+	UserId    uuid.UUID `json:"userId"`
+	Data      []byte    `json:"data"`
+	Type      string    `json:"type"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
 type Jwk struct {
 	ID         uuid.UUID  `json:"id"`
 	PublicKey  string     `json:"publicKey"`
 	PrivateKey string     `json:"privateKey"`
 	CreatedAt  time.Time  `json:"createdAt"`
 	ExpiresAt  *time.Time `json:"expiresAt"`
+}
+
+type Project struct {
+	ID          uuid.UUID `json:"id"`
+	UserId      uuid.UUID `json:"userId"`
+	Name        string    `json:"name"`
+	Slug        string    `json:"slug"`
+	Description *string   `json:"description"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
 type Session struct {
@@ -43,6 +62,18 @@ type Session struct {
 	UserAgent *string   `json:"userAgent"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type Subscription struct {
+	ID                  uuid.UUID  `json:"id"`
+	UserId              uuid.UUID  `json:"userId"`
+	PolarSubscriptionId *string    `json:"polarSubscriptionId"`
+	Tier                string     `json:"tier"`
+	ScheduledTier       *string    `json:"scheduledTier"`
+	Status              string     `json:"status"`
+	CurrentPeriodEnd    *time.Time `json:"currentPeriodEnd"`
+	CreatedAt           time.Time  `json:"createdAt"`
+	UpdatedAt           time.Time  `json:"updatedAt"`
 }
 
 type User struct {

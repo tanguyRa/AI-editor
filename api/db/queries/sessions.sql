@@ -20,6 +20,19 @@
 -- name: CreateSession :one
 INSERT INTO
     "session" (
+        token,
+        "userId",
+        "expiresAt",
+        "ipAddress",
+        "userAgent"
+    )
+VALUES ($1, $2, $3, $4, $5)
+RETURNING
+    *;
+
+-- name: CreateSessionWithId :one
+INSERT INTO
+    "session" (
         id,
         token,
         "userId",

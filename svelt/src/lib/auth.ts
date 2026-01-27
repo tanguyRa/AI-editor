@@ -30,6 +30,7 @@ export const auth = betterAuth({
             generateId: false, // "serial" for auto-incrementing numeric IDs
         },
     },
+    trustedOrigins: [process.env.POLAR_SUCCESS_URL || 'http://localhost:3000', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'],
     emailAndPassword: {
         enabled: true,
         async sendResetPassword(url, user) {

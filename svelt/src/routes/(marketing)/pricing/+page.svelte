@@ -81,9 +81,9 @@
     function getDescription(product: Product): string {
         if (product.description) return product.description;
         const descriptions: Record<string, string> = {
-            "Free": "Get started with basic features",
-            "Premium": "For professionals who need more power",
-            "Premium-Annual": "Best value - save 2 months"
+            Free: "Get started with basic features",
+            Premium: "For professionals who need more power",
+            "Premium-Annual": "Best value - save 2 months",
         };
         return descriptions[product.slug] || "Access all features";
     }
@@ -133,7 +133,8 @@
         {:else}
             <div class="plans-grid">
                 {#each products as product}
-                    {@const isHighlighted = product.isHighlighted || product.slug === "Premium"}
+                    {@const isHighlighted =
+                        product.isHighlighted || product.slug === "Premium"}
                     <div class="plan-card" class:highlighted={isHighlighted}>
                         {#if isHighlighted}
                             <div class="badge">Most Popular</div>
@@ -146,25 +147,44 @@
 
                         <div class="plan-price">
                             <span class="amount">{formatPrice(product)}</span>
-                            <span class="cycle">{getBillingCycle(product)}</span>
+                            <span class="cycle">{getBillingCycle(product)}</span
+                            >
                             {#if getBillingPeriod(product)}
-                                <p class="period">{getBillingPeriod(product)}</p>
+                                <p class="period">
+                                    {getBillingPeriod(product)}
+                                </p>
                             {/if}
                         </div>
 
                         <ul class="features">
                             {#each product.benefits as benefit}
                                 <li>
-                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        width="20"
+                                        height="20"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <polyline points="20 6 9 17 4 12"
+                                        ></polyline>
                                     </svg>
                                     {benefit.description}
                                 </li>
                             {/each}
                             {#if product.benefits.length === 0}
                                 <li>
-                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        width="20"
+                                        height="20"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <polyline points="20 6 9 17 4 12"
+                                        ></polyline>
                                     </svg>
                                     Access to basic features
                                 </li>
@@ -265,7 +285,9 @@
         display: flex;
         flex-direction: column;
         position: relative;
-        transition: transform var(--transition-base), box-shadow var(--transition-base);
+        transition:
+            transform var(--transition-base),
+            box-shadow var(--transition-base);
         box-shadow: var(--shadow-md);
     }
 

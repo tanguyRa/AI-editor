@@ -1,35 +1,26 @@
 <script lang="ts">
     import type { LayoutProps } from "./$types";
-    import { authClient, useSession } from "$lib/auth-client";
+    import { useSession } from "$lib/auth-client";
+    import { goto } from "$app/navigation";
 
     let { children }: LayoutProps = $props();
 
     const session = useSession();
 
-    async function handleSignOut() {
-        await authClient.signOut();
-    }
+    $effect(() => {
+        if ($session.data) {
+            goto("/app");
+        }
+    });
 </script>
 
-<div class="auth-container">
-    <div class="auth-card">
-        {#if $session.data}
-            <div class="logged-in">
-                <div class="avatar">
-                    {$session.data.user.name?.charAt(0).toUpperCase() || "U"}
-                </div>
-                <h2>You're already signed in!</h2>
-                <p class="user-name">{$session.data.user.name}</p>
-                <p class="user-email">{$session.data.user.email}</p>
-                <button class="btn btn-secondary full-width" onclick={handleSignOut}>
-                    Sign Out
-                </button>
-            </div>
-        {:else}
+{#if !$session.data}
+    <div class="auth-container">
+        <div class="auth-card">
             {@render children()}
-        {/if}
+        </div>
     </div>
-</div>
+{/if}
 
 <style>
     .full-width {

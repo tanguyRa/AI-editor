@@ -14,6 +14,46 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO
     "user" (
+        "name",
+        "email",
+        "emailVerified",
+        "image"
+    )
+VALUES ($1, $2, $3, $4)
+RETURNING
+    id, name, email, "emailVerified", image, "createdAt", "updatedAt"
+`
+
+type CreateUserParams struct {
+	Name          string  `json:"name"`
+	Email         string  `json:"email"`
+	EmailVerified bool    `json:"emailVerified"`
+	Image         *string `json:"image"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Name,
+		arg.Email,
+		arg.EmailVerified,
+		arg.Image,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.EmailVerified,
+		&i.Image,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createUserWithId = `-- name: CreateUserWithId :one
+INSERT INTO
+    "user" (
         "id",
         "name",
         "email",
@@ -25,7 +65,7 @@ RETURNING
     id, name, email, "emailVerified", image, "createdAt", "updatedAt"
 `
 
-type CreateUserParams struct {
+type CreateUserWithIdParams struct {
 	ID            uuid.UUID `json:"id"`
 	Name          string    `json:"name"`
 	Email         string    `json:"email"`
@@ -33,8 +73,8 @@ type CreateUserParams struct {
 	Image         *string   `json:"image"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser,
+func (q *Queries) CreateUserWithId(ctx context.Context, arg CreateUserWithIdParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUserWithId,
 		arg.ID,
 		arg.Name,
 		arg.Email,

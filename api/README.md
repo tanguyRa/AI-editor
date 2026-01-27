@@ -37,6 +37,7 @@ app/
     │   ├── README.md
     │   ├── auth.go
     │   ├── handlers.go
+    │   ├── polar.go
     │   └── response.go
     ├── middleware/
     │   ├── README.md
@@ -47,9 +48,12 @@ app/
     │   ├── README.md
     │   ├── accounts.sql.go
     │   ├── db.go
+    │   ├── events.sql.go
     │   ├── jwks.sql.go
     │   ├── models.go
+    │   ├── projects.sql.go
     │   ├── sessions.sql.go
+    │   ├── subscriptions.sql.go
     │   └── users.sql.go
     ├── server/
     │   ├── README.md

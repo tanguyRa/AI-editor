@@ -1,6 +1,18 @@
 -- name: CreateAccount :one
 INSERT INTO
     "account" (
+        "userId",
+        "accountId",
+        "providerId",
+        password
+    )
+VALUES ($1, $2, $3, $4)
+RETURNING
+    *;
+
+-- name: CreateAccountWithId :one
+INSERT INTO
+    "account" (
         id,
         "userId",
         "accountId",

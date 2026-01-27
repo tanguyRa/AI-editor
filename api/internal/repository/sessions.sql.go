@@ -17,20 +17,18 @@ const createSession = `-- name: CreateSession :one
 
 INSERT INTO
     "session" (
-        id,
         token,
         "userId",
         "expiresAt",
         "ipAddress",
         "userAgent"
     )
-VALUES ($1, $2, $3, $4, $5, $6)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING
     id, "userId", token, "expiresAt", "ipAddress", "userAgent", "createdAt", "updatedAt"
 `
 
 type CreateSessionParams struct {
-	ID        uuid.UUID `json:"id"`
 	Token     string    `json:"token"`
 	UserId    uuid.UUID `json:"userId"`
 	ExpiresAt time.Time `json:"expiresAt"`
@@ -59,6 +57,52 @@ type CreateSessionParams struct {
 // );
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
 	row := q.db.QueryRow(ctx, createSession,
+		arg.Token,
+		arg.UserId,
+		arg.ExpiresAt,
+		arg.IpAddress,
+		arg.UserAgent,
+	)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserId,
+		&i.Token,
+		&i.ExpiresAt,
+		&i.IpAddress,
+		&i.UserAgent,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createSessionWithId = `-- name: CreateSessionWithId :one
+INSERT INTO
+    "session" (
+        id,
+        token,
+        "userId",
+        "expiresAt",
+        "ipAddress",
+        "userAgent"
+    )
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING
+    id, "userId", token, "expiresAt", "ipAddress", "userAgent", "createdAt", "updatedAt"
+`
+
+type CreateSessionWithIdParams struct {
+	ID        uuid.UUID `json:"id"`
+	Token     string    `json:"token"`
+	UserId    uuid.UUID `json:"userId"`
+	ExpiresAt time.Time `json:"expiresAt"`
+	IpAddress *string   `json:"ipAddress"`
+	UserAgent *string   `json:"userAgent"`
+}
+
+func (q *Queries) CreateSessionWithId(ctx context.Context, arg CreateSessionWithIdParams) (Session, error) {
+	row := q.db.QueryRow(ctx, createSessionWithId,
 		arg.ID,
 		arg.Token,
 		arg.UserId,

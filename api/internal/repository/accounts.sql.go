@@ -14,6 +14,52 @@ import (
 const createAccount = `-- name: CreateAccount :one
 INSERT INTO
     "account" (
+        "userId",
+        "accountId",
+        "providerId",
+        password
+    )
+VALUES ($1, $2, $3, $4)
+RETURNING
+    id, "userId", "accountId", "providerId", "accessToken", "refreshToken", "accessTokenExpiresAt", "refreshTokenExpiresAt", scope, "idToken", password, "createdAt", "updatedAt"
+`
+
+type CreateAccountParams struct {
+	UserId     uuid.UUID `json:"userId"`
+	AccountId  string    `json:"accountId"`
+	ProviderId string    `json:"providerId"`
+	Password   *string   `json:"password"`
+}
+
+func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
+	row := q.db.QueryRow(ctx, createAccount,
+		arg.UserId,
+		arg.AccountId,
+		arg.ProviderId,
+		arg.Password,
+	)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.UserId,
+		&i.AccountId,
+		&i.ProviderId,
+		&i.AccessToken,
+		&i.RefreshToken,
+		&i.AccessTokenExpiresAt,
+		&i.RefreshTokenExpiresAt,
+		&i.Scope,
+		&i.IdToken,
+		&i.Password,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createAccountWithId = `-- name: CreateAccountWithId :one
+INSERT INTO
+    "account" (
         id,
         "userId",
         "accountId",
@@ -25,7 +71,7 @@ RETURNING
     id, "userId", "accountId", "providerId", "accessToken", "refreshToken", "accessTokenExpiresAt", "refreshTokenExpiresAt", scope, "idToken", password, "createdAt", "updatedAt"
 `
 
-type CreateAccountParams struct {
+type CreateAccountWithIdParams struct {
 	ID         uuid.UUID `json:"id"`
 	UserId     uuid.UUID `json:"userId"`
 	AccountId  string    `json:"accountId"`
@@ -33,8 +79,8 @@ type CreateAccountParams struct {
 	Password   *string   `json:"password"`
 }
 
-func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
-	row := q.db.QueryRow(ctx, createAccount,
+func (q *Queries) CreateAccountWithId(ctx context.Context, arg CreateAccountWithIdParams) (Account, error) {
+	row := q.db.QueryRow(ctx, createAccountWithId,
 		arg.ID,
 		arg.UserId,
 		arg.AccountId,

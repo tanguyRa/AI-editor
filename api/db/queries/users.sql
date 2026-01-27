@@ -4,6 +4,18 @@ SELECT * FROM "user";
 -- name: CreateUser :one
 INSERT INTO
     "user" (
+        "name",
+        "email",
+        "emailVerified",
+        "image"
+    )
+VALUES ($1, $2, $3, $4)
+RETURNING
+    *;
+
+-- name: CreateUserWithId :one
+INSERT INTO
+    "user" (
         "id",
         "name",
         "email",
